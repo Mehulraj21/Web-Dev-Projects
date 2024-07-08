@@ -1,0 +1,99 @@
+// Function to save a note
+function saveNote() {
+    var title = document.getElementById("noteTitle").value;
+    var content = document.getElementById("noteContent").value;
+
+    if (title.trim() === "" || content.trim() === "") {
+        alert("Please enter both title and content for the note.");
+        return;
+    }
+
+    // Get existing notes from local storage or initialize empty array
+    var existingNotes = JSON.parse(localStorage.getItem("notes")) || [];
+
+    // Add the new note to the array
+    var newNote = {
+        title: title,
+        content: content
+    };
+    existingNotes.push(newNote);
+
+    // Save the updated notes array back to local storage
+    localStorage.setItem("notes", JSON.stringify(existingNotes));
+
+    // Clear input fields after saving
+    document.getElementById("noteTitle").value = "";
+    document.getElementById("noteContent").value = "";
+
+    // Update the notes displayed on the page
+    displayNotes();
+}
+
+// Function to display notes from local storage
+function displayNotes() {
+    var notesList = document.getElementById("notesList");
+    notesList.innerHTML = ""; // Clear existing notes
+
+    var existingNotes = JSON.parse(localStorage.getItem("notes")) || [];
+
+    existingNotes.forEach(function(note, index) {
+        var noteTemplate = document.getElementById("noteTemplate");
+        var newNote = noteTemplate.content.cloneNode(true);
+
+        newNote.querySelector(".note-title").textContent = note.title;
+        newNote.querySelector(".note-content").textContent = note.content;
+
+        // Add event listener to checkbox for deletion
+        newNote.querySelector(".note-checkbox").addEventListener("change", function() {
+            deleteNote();
+        });
+
+        notesList.appendChild(newNote);
+    });
+}
+
+// Function to delete a note
+function deleteNote() {
+    var existingNotes = JSON.parse(localStorage.getItem("notes")) || [];
+    var notes = document.querySelectorAll(".note");
+
+    notes.forEach(function(note, index) {
+        var checkbox = note.querySelector(".note-checkbox");
+        if (checkbox.checked) {
+            existingNotes.splice(index, 1); // Remove note from array
+        }
+    });
+
+    // Save the updated notes array back to local storage
+    localStorage.setItem("notes", JSON.stringify(existingNotes));
+
+    // Update the notes displayed on the page
+    displayNotes();
+}
+
+// Function to clear all notes
+function clearAllNotes() {
+    localStorage.removeItem("notes"); // Clear notes from local storage
+    displayNotes(); // Update the notes displayed on the page
+}
+
+// Function to search notes
+function searchNotes() {
+    var searchTerm = document.getElementById("search").value.toLowerCase();
+    var notes = document.querySelectorAll(".note");
+
+    notes.forEach(function(note) {
+        var title = note.querySelector(".note-title").textContent.toLowerCase();
+        var content = note.querySelector(".note-content").textContent.toLowerCase();
+        if (title.includes(searchTerm) || content.includes(searchTerm)) {
+            note.style.display = "block";
+        } else {
+            note.style.display = "none";
+        }
+    });
+}
+
+// Load existing notes when the page loads
+window.onload = function() {
+    displayNotes();
+};
